@@ -1,0 +1,26 @@
+{
+  "name": "octopod-service",
+  "version": "1.0.0",
+  "description": "Classes and interfaces to help the making of services for the npm package 'octopod'.",
+  "main": "./lib/exports.js",
+  "engines": {
+    "node": ">= 4"
+  },
+  "scripts": {
+    "build": "cd src && tsc",
+    "dev": "cd src && tsc -w"
+  },
+  "author": "Adrien Castex <adrien.castex@gmail.com>",
+  "license": "Unlicense",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenMarshal/npm-WebDAV-Server.git"
+  },
+  "types": "./lib/exports.d.ts",
+  "dependencies": {
+    "webdav-client": "^1.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "^8.0.14"
+  }
+}
