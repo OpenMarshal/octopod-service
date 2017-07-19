@@ -351,6 +351,24 @@ export class Service extends Connection
     call<T, Q>(service : string, method : string, inputData : Q, callback : (response : T, responsePaths : { [method : string] : string[] }, cleanup : () => void) => void) : void
     call<T, Q>(service : string, method : string, inputData : Q, callback : (response : T, responsePaths : { [method : string] : string[] }, cleanup : () => void) => void) : void
     {
-        call<T, Q>(this.options.url, service, method, inputData, callback);
+        this.invokeServiceAction({
+            url: '/services/' + service + '/' + method,
+            action: 'call-service',
+            body: JSON.stringify(inputData)
+        }, (e, res, body) => {
+            const info = JSON.parse(body.toString());
+
+            const reengage = () => {
+                this.getObject<T>(info.mainOutput, (e, body) => {
+                    if(e || res.statusCode >= 400)
+                        return setTimeout(() => reengage(), 1000);
+
+                    callback(body, info.outputs, () => {
+                        this.dispose(info.outputs);
+                    });
+                })
+            }
+            reengage();
+        });
     }
 }
