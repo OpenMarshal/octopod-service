@@ -1,6 +1,8 @@
 import { ServiceReference, ServiceReferenceExtended } from './ServiceReference'
 import { ServiceCommand, ServiceCommandResponse } from './Command'
 import { Connection, ResponseCallback } from 'webdav-client'
+import { WatchFileResponse } from './Core'
+import { call } from './Call'
 
 export interface TraceInfo<T>
 {
@@ -310,24 +312,45 @@ export class Service extends Connection
         })
     }
 
-    call<T, Q>(service : string, method : string, inputData : Q, callback : (response : T, responsePaths : { [method : string] : string[] }) => void) : void
+    watchFolder(path : string, callback : (response : WatchFileResponse) => void) : void
     {
+        const reengage = () => setTimeout(() => this.watchFolder(path, callback), 1000);
+
         this.invokeServiceAction({
-            url: '/services/' + service + '/' + method,
-            action: 'call-service',
-            body: JSON.stringify(inputData)
+            url: path,
+            action: 'watch-folder'
         }, (e, res, body) => {
-            const info = JSON.parse(body.toString());
+            if(e)
+                return reengage();
 
-            const reengage = () => {
-                this.getObject<T>(info.mainOutput, (e, body) => {
-                    if(e || res.statusCode >= 400)
-                        return setTimeout(() => reengage(), 1000);
+            const tis : WatchFileResponse[] = JSON.parse(body.toString());
+            tis.forEach((ti) => callback(ti));
 
-                    callback(body, info.outputs);
-                })
-            }
             reengage();
-        });
+        })
+    }
+    watchFile(path : string, callback : (response : WatchFileResponse) => void) : void
+    {
+        const reengage = () => setTimeout(() => this.watchFolder(path, callback), 1000);
+
+        this.invokeServiceAction({
+            url: path,
+            action: 'watch-file'
+        }, (e, res, body) => {
+            if(e)
+                return reengage();
+
+            callback(JSON.parse(body.toString()));
+
+            reengage();
+        })
+    }
+
+    call(service : string, method : string, inputData : any, callback : (response : any, responsePaths : { [method : string] : string[] }, cleanup : () => void) => void) : void
+    call<T>(service : string, method : string, inputData : any, callback : (response : T, responsePaths : { [method : string] : string[] }, cleanup : () => void) => void) : void
+    call<T, Q>(service : string, method : string, inputData : Q, callback : (response : T, responsePaths : { [method : string] : string[] }, cleanup : () => void) => void) : void
+    call<T, Q>(service : string, method : string, inputData : Q, callback : (response : T, responsePaths : { [method : string] : string[] }, cleanup : () => void) => void) : void
+    {
+        call<T, Q>(this.options.url, service, method, inputData, callback);
     }
 }

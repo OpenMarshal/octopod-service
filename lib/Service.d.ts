@@ -1,6 +1,7 @@
 /// <reference types="node" />
 import { ServiceReference } from './ServiceReference';
 import { Connection, ResponseCallback } from 'webdav-client';
+import { WatchFileResponse } from './Core';
 export interface TraceInfo<T> {
     data: T;
     path: string;
@@ -44,7 +45,15 @@ export declare class Service extends Connection {
     }, callback?: () => void): any;
     invokeServiceAction(options: ServiceActionInvokeOptions, callback: ResponseCallback): void;
     bindMethod<T>(method: string, callbackOnInput: (data: T, info: TraceInfo<T>) => void): void;
+    watchFolder(path: string, callback: (response: WatchFileResponse) => void): void;
+    watchFile(path: string, callback: (response: WatchFileResponse) => void): void;
+    call(service: string, method: string, inputData: any, callback: (response: any, responsePaths: {
+        [method: string]: string[];
+    }, cleanup: () => void) => void): void;
+    call<T>(service: string, method: string, inputData: any, callback: (response: T, responsePaths: {
+        [method: string]: string[];
+    }, cleanup: () => void) => void): void;
     call<T, Q>(service: string, method: string, inputData: Q, callback: (response: T, responsePaths: {
         [method: string]: string[];
-    }) => void): void;
+    }, cleanup: () => void) => void): void;
 }
