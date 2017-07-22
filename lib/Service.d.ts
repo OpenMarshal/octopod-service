@@ -20,6 +20,7 @@ export declare class Service extends Connection {
     uid: string;
     saveQueue: (() => void)[];
     saving: boolean;
+    referenceInformation: ServiceReference;
     commands: {
         [name: string]: (data: any, done: (response?: any) => void) => void;
     };
@@ -38,7 +39,10 @@ export declare class Service extends Connection {
     error(text: string, more?: any): void;
     sendCommand(service: string, command: string, data: any, callback?: (error: Error, response: any) => void): any;
     sendCommand<T>(service: string, command: string, data: any, callback?: (error: Error, response: T) => void): any;
-    reference(options: ServiceReference, callback?: (error: Error) => void): void;
+    reference(): any;
+    reference(callback: (error: Error) => void): any;
+    reference(options: ServiceReference, callback: (error: Error) => void): any;
+    reference(options: ServiceReference): any;
     dispose<T>(info: TraceInfo<T>, callback?: () => void): any;
     dispose(paths: {
         [method: string]: string[];

@@ -25,6 +25,7 @@ export class Service extends Connection
 
     saveQueue : (() => void)[];
     saving : boolean;
+    referenceInformation : ServiceReference;
 
     commands : {
         [name : string] : (data : any, done : (response ?: any) => void) => void
@@ -179,9 +180,16 @@ export class Service extends Connection
         })
     }
 
-    reference(options : ServiceReference, callback ?: (error : Error) => void)
+    reference()
+    reference(callback : (error : Error) => void)
+    reference(options : ServiceReference, callback : (error : Error) => void)
+    reference(options : ServiceReference)
+    reference(_options ?: ServiceReference | ((error : Error) => void), _callback ?: (error : Error) => void)
     {
-        const body : ServiceReferenceExtended = JSON.parse(JSON.stringify(options));
+        const options = _options && _options.constructor !== Function ? _options as ServiceReference : this.referenceInformation;
+        const callback = _callback ? _callback : _options && _options.constructor === Function ? _options as ((error : Error) => void) : undefined;
+
+        const body : ServiceReferenceExtended = JSON.parse(JSON.stringify(options ? options : {}));
         body.name = this.options.username;
 
         if(!body.inputs)
