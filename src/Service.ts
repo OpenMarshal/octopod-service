@@ -371,17 +371,50 @@ export class Service extends Connection
     call<T, Q>(service : string, method : string, inputData : Q, callback : (response : T, responsePaths : { [method : string] : string[] }, cleanup : () => void) => void) : void
     call<T, Q>(service : string, method : string, inputData : Q, callback : (response : T, responsePaths : { [method : string] : string[] }, cleanup : () => void) => void) : void
     {
+        const recall = () => {
+            this.call(service, method, inputData, callback);
+        }
+
         this.invokeServiceAction({
             url: '/services/' + service + '/' + method,
             action: 'call-service',
             body: JSON.stringify(inputData)
         }, (e, res, body) => {
+            if(e || res.statusCode >= 400)
+                return setTimeout(() => recall(), 1000);
+
             const info = JSON.parse(body.toString());
 
+            const reengage = () => {
+                this.getObject<T>(info.mainOutput, (e, body) => {
+                    if(e || res.statusCode >= 400)
+                        return setTimeout(() => reengage(), 1000);
+
+                    callback(body, info.outputs, () => {
+                        this.dispose(info.outputs);
+                    });
+                })
+            }
+            reengage();
+        });
+    }
+    
+    callEx(service : string, method : string, inputData : any, callback : (response : any, responsePaths : { [method : string] : string[] }, cleanup : () => void) => void) : void
+    callEx<T>(service : string, method : string, inputData : any, callback : (response : T, responsePaths : { [method : string] : string[] }, cleanup : () => void) => void) : void
+    callEx<T, Q>(service : string, method : string, inputData : Q, callback : (response : T, responsePaths : { [method : string] : string[] }, cleanup : () => void) => void) : void
+    callEx<T, Q>(service : string, method : string, inputData : Q, callback : (response : T, responsePaths : { [method : string] : string[] }, cleanup : () => void) => void) : void
+    {
+        this.invokeServiceAction({
+            url: '/services/' + service + '/' + method,
+            action: 'call-service',
+            body: JSON.stringify(inputData)
+        }, (e, res, body) => {
             if(e)
                 return this.events.error(e);
             if(res.statusCode >= 400)
                 return this.events.error(new Error(res.statusCode + ' - ' + res.statusMessage));
+
+            const info = JSON.parse(body.toString());
 
             const reengage = () => {
                 this.getObject<T>(info.mainOutput, (e, body) => {

@@ -64,4 +64,13 @@ export declare class Service extends Connection {
     call<T, Q>(service: string, method: string, inputData: Q, callback: (response: T, responsePaths: {
         [method: string]: string[];
     }, cleanup: () => void) => void): void;
+    callEx(service: string, method: string, inputData: any, callback: (response: any, responsePaths: {
+        [method: string]: string[];
+    }, cleanup: () => void) => void): void;
+    callEx<T>(service: string, method: string, inputData: any, callback: (response: T, responsePaths: {
+        [method: string]: string[];
+    }, cleanup: () => void) => void): void;
+    callEx<T, Q>(service: string, method: string, inputData: Q, callback: (response: T, responsePaths: {
+        [method: string]: string[];
+    }, cleanup: () => void) => void): void;
 }
