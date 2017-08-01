@@ -380,6 +380,8 @@ export class Service extends Connection
 
             if(e)
                 return this.events.error(e);
+            if(res.statusCode >= 400)
+                return this.events.error(new Error(res.statusCode + ' - ' + res.statusMessage));
 
             const reengage = () => {
                 this.getObject<T>(info.mainOutput, (e, body) => {
