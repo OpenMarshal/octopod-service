@@ -21,6 +21,9 @@ export declare class Service extends Connection {
     saveQueue: (() => void)[];
     saving: boolean;
     referenceInformation: ServiceReference;
+    events: {
+        error: (error: Error) => void;
+    };
     commands: {
         [name: string]: (data: any, done: (response?: any) => void) => void;
     };
@@ -51,6 +54,7 @@ export declare class Service extends Connection {
     bindMethod<T>(method: string, callbackOnInput: (data: T, info: TraceInfo<T>) => void): void;
     watchFolder(path: string, callback: (response: WatchFileResponse) => void): void;
     watchFile(path: string, callback: (response: WatchFileResponse) => void): void;
+    on(event: 'error', callback: (error: Error) => void): this;
     call(service: string, method: string, inputData: any, callback: (response: any, responsePaths: {
         [method: string]: string[];
     }, cleanup: () => void) => void): void;

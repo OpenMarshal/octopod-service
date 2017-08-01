@@ -26,6 +26,9 @@ export class Service extends Connection
     saveQueue : (() => void)[];
     saving : boolean;
     referenceInformation : ServiceReference;
+    events : {
+        error : (error : Error) => void
+    };
 
     commands : {
         [name : string] : (data : any, done : (response ?: any) => void) => void
@@ -43,6 +46,9 @@ export class Service extends Connection
         this.commands = { };
         this.saveQueue = [ ];
         this.saving = false;
+        this.events = {
+            error: (e) => { throw e; }
+        };
     }
 /*
     reserveWriteClose(root : string, data : any, callback : (error : Error, path : string) => void)
@@ -354,6 +360,12 @@ export class Service extends Connection
         })
     }
 
+    on(event : 'error', callback : (error : Error) => void) : this
+    {
+        this.events[event] = callback ? callback : (e) => { throw e; };
+        return this;
+    }
+
     call(service : string, method : string, inputData : any, callback : (response : any, responsePaths : { [method : string] : string[] }, cleanup : () => void) => void) : void
     call<T>(service : string, method : string, inputData : any, callback : (response : T, responsePaths : { [method : string] : string[] }, cleanup : () => void) => void) : void
     call<T, Q>(service : string, method : string, inputData : Q, callback : (response : T, responsePaths : { [method : string] : string[] }, cleanup : () => void) => void) : void
@@ -365,6 +377,9 @@ export class Service extends Connection
             body: JSON.stringify(inputData)
         }, (e, res, body) => {
             const info = JSON.parse(body.toString());
+
+            if(e)
+                return this.events.error(e);
 
             const reengage = () => {
                 this.getObject<T>(info.mainOutput, (e, body) => {
