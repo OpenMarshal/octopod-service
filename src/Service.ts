@@ -366,6 +366,27 @@ export class Service extends Connection
         return this;
     }
 
+    writeToService(service : string, method : string, data : any, callback : () => void) : void
+    writeToService<T>(service : string, method : string, data : T, callback : () => void) : void
+    writeToService<T>(service : string, method : string, data : T, callback : () => void) : void
+    {
+        this.call<{ path : string }>('core', 'reserve-file', {
+            service,
+            method
+        }, (path, paths) => {
+            this.dispose(paths);
+
+            const write = () => {
+                this.putObject(path.path, data, (e) => {
+                    if(e)
+                        return write();
+                    callback();
+                })
+            }
+            write();
+        })
+    }
+
     call(service : string, method : string, inputData : any, callback : (response : any, responsePaths : { [method : string] : string[] }, cleanup : () => void) => void) : void
     call<T>(service : string, method : string, inputData : any, callback : (response : T, responsePaths : { [method : string] : string[] }, cleanup : () => void) => void) : void
     call<T, Q>(service : string, method : string, inputData : Q, callback : (response : T, responsePaths : { [method : string] : string[] }, cleanup : () => void) => void) : void
