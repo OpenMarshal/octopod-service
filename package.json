@@ -1,6 +1,6 @@
 {
   "name": "octopod",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Classes and interfaces to help the making of services or the call of services for the 'octopod-core' npm package.",
   "main": "./lib/exports.js",
   "engines": {
