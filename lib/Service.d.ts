@@ -18,6 +18,7 @@ export interface ServiceActionInvokeOptions {
 export declare class Service extends Connection {
     shared: boolean;
     uid: string;
+    referenced: boolean;
     saveQueue: (() => void)[];
     saving: boolean;
     referenceInformation: ServiceReference;

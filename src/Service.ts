@@ -22,6 +22,7 @@ export interface ServiceActionInvokeOptions
 export class Service extends Connection
 {
     uid : string
+    referenced : boolean
 
     saveQueue : (() => void)[];
     saving : boolean;
@@ -43,8 +44,9 @@ export class Service extends Connection
 
         this.uid = process.pid + '_' + Date.now() + '_' + Math.random().toString() + '_' + Math.random().toString();
 
-        this.commands = { };
+        this.referenced = false;
         this.saveQueue = [ ];
+        this.commands = { };
         this.saving = false;
         this.events = {
             error: (e) => { throw e; }
@@ -117,6 +119,11 @@ export class Service extends Connection
     saveConfiguration<T>(data : T, callback ?: () => void) : void
     saveConfiguration<T>(data : T, callback ?: () => void) : void
     {
+        if(!this.referenced)
+            return this.reference((e) => {
+                this.saveConfiguration(data, callback);
+            })
+        
         this.putObject<T>('/services/' + this.options.username + '/.config.json', data, (e) => {
             if(callback)
                 callback();
@@ -154,7 +161,13 @@ export class Service extends Connection
             return;
 
         this.saving = true;
-        this.saveQueue.shift()();
+
+        if(this.referenced)
+            return this.saveQueue.shift()();
+
+        this.reference((e) => {
+            this.saveQueue.shift()();
+        })
     }
 
     log(text : string, more ?: any)
@@ -253,7 +266,8 @@ export class Service extends Connection
                 })
             }
             updateProcessInformation();
-            
+
+            this.referenced = true;
             if(callback)
                 callback(e);
         })
