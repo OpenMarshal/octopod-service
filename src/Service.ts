@@ -380,9 +380,9 @@ export class Service extends Connection
         return this;
     }
 
-    writeToService(service : string, method : string, data : any, callback : () => void) : void
-    writeToService<T>(service : string, method : string, data : T, callback : () => void) : void
-    writeToService<T>(service : string, method : string, data : T, callback : () => void) : void
+    dropToService(service : string, method : string, data : any, callback : () => void) : void
+    dropToService<T>(service : string, method : string, data : T, callback : () => void) : void
+    dropToService<T>(service : string, method : string, data : T, callback : () => void) : void
     {
         this.call<{ path : string }>('core', 'reserve-file', {
             service,
@@ -420,6 +420,9 @@ export class Service extends Connection
 
             const info = JSON.parse(body.toString());
 
+            if(!info.mainOutput)
+                return callback(null, info.outputs, () => { });
+
             const reengage = () => {
                 this.getObject<T>(info.mainOutput, (e, body) => {
                     if(e || res.statusCode >= 400)
@@ -450,6 +453,9 @@ export class Service extends Connection
                 return this.events.error(new Error(res.statusCode + ' - ' + res.statusMessage));
 
             const info = JSON.parse(body.toString());
+
+            if(!info.mainOutput)
+                return callback(null, info.outputs, () => { });
 
             const reengage = () => {
                 this.getObject<T>(info.mainOutput, (e, body) => {
