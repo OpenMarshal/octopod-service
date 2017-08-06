@@ -56,8 +56,8 @@ export declare class Service extends Connection {
     watchFolder(path: string, callback: (response: WatchFileResponse) => void): void;
     watchFile(path: string, callback: (response: WatchFileResponse) => void): void;
     on(event: 'error', callback: (error: Error) => void): this;
-    dropToService(service: string, method: string, data: any, callback: () => void): void;
-    dropToService<T>(service: string, method: string, data: T, callback: () => void): void;
+    dropToFolder(path: string, data: any, callback: () => void): void;
+    dropToFolder<T>(path: string, data: T, callback: () => void): void;
     call(service: string, method: string, inputData: any, callback: (response: any, responsePaths: {
         [method: string]: string[];
     }, cleanup: () => void) => void): void;

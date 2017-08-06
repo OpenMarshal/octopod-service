@@ -380,13 +380,12 @@ export class Service extends Connection
         return this;
     }
 
-    dropToService(service : string, method : string, data : any, callback : () => void) : void
-    dropToService<T>(service : string, method : string, data : T, callback : () => void) : void
-    dropToService<T>(service : string, method : string, data : T, callback : () => void) : void
+    dropToFolder(path : string, data : any, callback : () => void) : void
+    dropToFolder<T>(path : string, data : T, callback : () => void) : void
+    dropToFolder<T>(path : string, data : T, callback : () => void) : void
     {
         this.call<{ path : string }>('core', 'reserve-file', {
-            service,
-            method
+            path
         }, (path, paths) => {
             this.dispose(paths);
 
